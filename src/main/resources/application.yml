@@ -1,0 +1,130 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: on_param
+    include-exception: false
+
+spring:
+  application:
+    name: document-processor-strategy
+
+  # Configuración para archivos multipart
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB           # Tamaño máximo por archivo
+      max-request-size: 100MB        # Tamaño máximo de la request
+      file-size-threshold: 2KB       # Threshold para escribir a disco
+      location: ${java.io.tmpdir}    # Directorio temporal
+
+  # Configuración de Jackson para JSON
+  jackson:
+    default-property-inclusion: NON_NULL
+    serialization:
+      write-dates-as-timestamps: false
+      indent-output: true
+    deserialization:
+      fail-on-unknown-properties: false
+    time-zone: UTC
+
+  # Configuración de validación
+  validation:
+    enabled: true
+
+# Configuración de logging
+logging:
+  level:
+    root: INFO
+    com.example.documentprocessor: DEBUG
+    org.apache.poi: WARN
+    org.apache.pdfbox: WARN
+    com.opencsv: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/document-processor.log
+    max-size: 100MB
+    max-history: 30
+
+# Configuración específica de la aplicación
+document-processor:
+  # Límites de procesamiento
+  limits:
+    max-file-size-bytes: 104857600      # 100MB
+    max-processing-time-ms: 300000      # 5 minutos
+    max-text-length: 10000000           # 10M caracteres
+    max-table-rows: 100000              # 100K filas
+    max-excel-sheets: 50                # 50 hojas máximo
+
+  # Configuración por tipo de documento
+  document-types:
+    pdf:
+      extract-images: false
+      extract-forms: false
+      max-pages: 1000
+    excel:
+      evaluate-formulas: true
+      include-hidden-sheets: false
+      max-rows-per-sheet: 100000
+    word:
+      extract-images: false
+      extract-comments: false
+      extract-revisions: false
+    csv:
+      auto-detect-delimiter: true
+      auto-detect-encoding: true
+      max-columns: 1000
+
+  # Configuración de estadísticas
+  statistics:
+    enable-word-frequency: true
+    max-top-words: 20
+    min-word-length: 3
+    enable-language-detection: true
+
+  # Configuración de rendimiento
+  performance:
+    enable-caching: false
+    cache-ttl-minutes: 60
+    async-processing: false
+    thread-pool-size: 4
+
+# Configuración de actuator para monitoreo
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,loggers
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+    info:
+      enabled: true
+  info:
+    env:
+      enabled: true
+    java:
+      enabled: true
+    os:
+      enabled: true
+
+# Información de la aplicación
+info:
+  app:
+    name: Document Processor Strategy Pattern
+    description: A Spring Boot application demonstrating the Strategy pattern for document processing
+    version: 1.0.0
+    author: Strategy Pattern Demo
+  features:
+    - PDF text extraction and analysis
+    - Excel data processing with multiple sheets
+    - Word document content extraction
+    - CSV parsing with auto-detection
+    - Automatic strategy selection
+    - Comprehensive document statistics
