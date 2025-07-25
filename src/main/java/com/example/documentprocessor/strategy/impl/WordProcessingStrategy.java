@@ -51,20 +51,20 @@ public class WordProcessingStrategy implements DocumentProcessingStrategy {
             } else {
                 return resultBuilder
                         .success(false)
-                        .message("Unsupported Word document format: " + fileExtension)
-                        .errors(List.of("Only .doc and .docx formats are supported"))
+                        .message("Formato de documento de Word no compatible: " + fileExtension)
+                        .errors(List.of("Solo se admiten los formatos .doc y .docx"))
                         .processingTimeMs(System.currentTimeMillis() - startTime)
                         .build();
             }
 
         } catch (Exception e) {
-            log.error("Error processing Word document: {}", document.getName(), e);
+            log.error("Error al procesar documento de Word: {}", document.getName(), e);
             long processingTime = System.currentTimeMillis() - startTime;
 
             return resultBuilder
                     .success(false)
-                    .message("Failed to process Word document")
-                    .errors(List.of("Processing error: " + e.getMessage()))
+                    .message("No se pudo procesar el documento de Word")
+                    .errors(List.of("error de procesamiento: " + e.getMessage()))
                     .processingTimeMs(processingTime)
                     .build();
         }
@@ -94,7 +94,7 @@ public class WordProcessingStrategy implements DocumentProcessingStrategy {
 
             return resultBuilder
                     .success(true)
-                    .message(String.format("Successfully processed DOCX with %d paragraphs and %d tables",
+                    .message(String.format("DOCX procesado exitosamente con %d párrafos y %d tablas",
                             docxDocument.getParagraphs().size(), docxDocument.getTables().size()))
                     .metadata(metadata)
                     .extractedText(extractedText)
@@ -104,11 +104,11 @@ public class WordProcessingStrategy implements DocumentProcessingStrategy {
                     .build();
 
         } catch (Exception e) {
-            log.error("Error processing DOCX document: {}", document.getName(), e);
+            log.error("Error al procesar el documento DOCX: {}", document.getName(), e);
             return resultBuilder
                     .success(false)
-                    .message("Failed to process DOCX document")
-                    .errors(List.of("DOCX processing error: " + e.getMessage()))
+                    .message("No se pudo procesar el documento DOCX")
+                    .errors(List.of("Error de procesamiento de DOCX: " + e.getMessage()))
                     .processingTimeMs(System.currentTimeMillis() - startTime)
                     .build();
         } finally {
@@ -140,7 +140,7 @@ public class WordProcessingStrategy implements DocumentProcessingStrategy {
 
             return resultBuilder
                     .success(true)
-                    .message("Successfully processed DOC document")
+                    .message("Documento DOC procesado exitosamente")
                     .metadata(metadata)
                     .extractedText(extractedText)
                     .extractedData(List.of(structuredContent))
@@ -149,11 +149,11 @@ public class WordProcessingStrategy implements DocumentProcessingStrategy {
                     .build();
 
         } catch (Exception e) {
-            log.error("Error processing DOC document: {}", document.getName(), e);
+            log.error("Error al procesar el documento DOC: {}", document.getName(), e);
             return resultBuilder
                     .success(false)
-                    .message("Failed to process DOC document")
-                    .errors(List.of("DOC processing error: " + e.getMessage()))
+                    .message("No se pudo procesar el documento DOC")
+                    .errors(List.of("Error de procesamiento de documentos: " + e.getMessage()))
                     .processingTimeMs(System.currentTimeMillis() - startTime)
                     .build();
         } finally {
@@ -310,7 +310,7 @@ public class WordProcessingStrategy implements DocumentProcessingStrategy {
             metadataBuilder.customProperties(customProps);
 
         } catch (Exception e) {
-            log.warn("Error extracting document properties: {}", e.getMessage());
+            log.warn("Error al extraer las propiedades del documento: {}", e.getMessage());
         }
 
         return metadataBuilder.build();
@@ -354,7 +354,7 @@ public class WordProcessingStrategy implements DocumentProcessingStrategy {
                 metadataBuilder.customProperties(customProps);
             }
         } catch (Exception e) {
-            log.warn("Error extracting DOC properties: {}", e.getMessage());
+            log.warn("Error al extraer las propiedades del documento: {}", e.getMessage());
         }
 
         return metadataBuilder.build();

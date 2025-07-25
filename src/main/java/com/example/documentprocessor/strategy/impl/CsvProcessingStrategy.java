@@ -49,8 +49,8 @@ public class CsvProcessingStrategy implements DocumentProcessingStrategy {
             if (csvData.isEmpty()) {
                 return resultBuilder
                         .success(false)
-                        .message("CSV file is empty")
-                        .errors(List.of("No data found in CSV file"))
+                        .message("El archivo CSV está vacío")
+                        .errors(List.of("No se encontraron datos en el archivo CSV"))
                         .build();
             }
 
@@ -72,7 +72,7 @@ public class CsvProcessingStrategy implements DocumentProcessingStrategy {
 
             return resultBuilder
                     .success(true)
-                    .message(String.format("Successfully processed CSV with %d rows and %d columns",
+                    .message(String.format("CSV procesado exitosamente con %d filas y %d columnas",
                             dataRows.size(), headers.length))
                     .metadata(metadata)
                     .extractedData(structuredData)
@@ -81,13 +81,13 @@ public class CsvProcessingStrategy implements DocumentProcessingStrategy {
                     .build();
 
         } catch (Exception e) {
-            log.error("Error processing CSV document: {}", document.getName(), e);
+            log.error("Error al procesar el documento CSV: {}", document.getName(), e);
             long processingTime = System.currentTimeMillis() - startTime;
 
             return resultBuilder
                     .success(false)
-                    .message("Failed to process CSV document")
-                    .errors(List.of("Processing error: " + e.getMessage()))
+                    .message("No se pudo procesar el documento CSV")
+                    .errors(List.of("error de procesamiento: " + e.getMessage()))
                     .processingTimeMs(processingTime)
                     .build();
         }

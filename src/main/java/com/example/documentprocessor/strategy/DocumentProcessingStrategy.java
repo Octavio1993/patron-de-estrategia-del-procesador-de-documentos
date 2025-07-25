@@ -5,38 +5,38 @@ import com.example.documentprocessor.model.DocumentType;
 import com.example.documentprocessor.model.ProcessingResult;
 
 /**
- * Strategy interface for processing different types of documents.
- * Each implementation handles a specific document type (PDF, Excel, Word, CSV).
+ * Interfaz de estrategia para procesar diferentes tipos de documentos.
+ * Cada implementación gestiona un tipo de documento específico (PDF, Excel, Word, CSV).
  */
 public interface DocumentProcessingStrategy {
 
     /**
-     * Process the given document and return the processing result.
+     * Procesa el documento dado y devuelve el resultado del procesamiento.
      *
-     * @param document the document to process
-     * @return ProcessingResult containing extracted data, metadata, and processing status
+     * @param document el documento a procesar
+     * @return ProcessingResult contiene los datos extraídos, los metadatos y el estado del procesamiento
      */
     ProcessingResult process(Document document);
 
     /**
-     * Get the document type that this strategy can handle.
+     * Obtener el tipo de documento que esta estrategia puede gestionar.
      *
-     * @return the supported DocumentType
+     * @return el tipo de documento admitido
      */
     DocumentType getSupportedType();
 
     /**
-     * Get the strategy name for identification purposes.
+     * Obtener el nombre de la estrategia para fines de identificación.
      *
-     * @return strategy name
+     * @return nombre de la estrategia
      */
     String getStrategyName();
 
     /**
-     * Validate if the document can be processed by this strategy.
+     * Validar si el documento puede procesarse con esta estrategia.
      *
-     * @param document the document to validate
-     * @return true if the document can be processed, false otherwise
+     * @param document el documento a validar
+     * @return true si el documento puede procesarse, false en caso contrario
      */
     default boolean canProcess(Document document) {
         if (document == null || document.getContent() == null || document.getContent().length == 0) {
@@ -52,38 +52,38 @@ public interface DocumentProcessingStrategy {
     }
 
     /**
-     * Validate the document before processing.
-     * This method can be overridden by implementations for specific validations.
+     * Validar el documento antes de procesarlo.
+     * Este método puede ser anulado por implementaciones para validaciones específicas.
      *
-     * @param document the document to validate
-     * @throws com.example.documentprocessor.exception.DocumentProcessingException if validation fails
+     * @param document el documento a validar
+     * @throws com.example.documentprocessor.exception.DocumentProcessingException si la validación falla
      */
     default void validateDocument(Document document) {
         if (document == null) {
-            throw new IllegalArgumentException("Document cannot be null");
+            throw new IllegalArgumentException("El documento no puede ser nulo.");
         }
 
         if (document.getContent() == null || document.getContent().length == 0) {
-            throw new IllegalArgumentException("Document content cannot be null or empty");
+            throw new IllegalArgumentException("El contenido del documento no puede ser nulo o vacío");
         }
 
         if (document.getName() == null || document.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Document name cannot be null or empty");
+            throw new IllegalArgumentException("El nombre del documento no puede ser nulo ni estar vacío");
         }
 
         if (!canProcess(document)) {
             throw new IllegalArgumentException(
-                    String.format("Document type '%s' is not supported by strategy '%s'",
+                    String.format("El tipo de documento '%s' no es compatible con la estrategia '%s'",
                             document.determineTypeFromExtension(), getStrategyName())
             );
         }
     }
 
     /**
-     * Get processing priority. Lower numbers indicate higher priority.
-     * Useful when multiple strategies might handle the same type.
+     * Obtener la prioridad de procesamiento. Los números más bajos indican una prioridad más alta.
+     * Útil cuando varias estrategias pueden gestionar el mismo tipo.
      *
-     * @return priority value (default: 100)
+     * @return valor de prioridad (predeterminado: 100)
      */
     default int getPriority() {
         return 100;

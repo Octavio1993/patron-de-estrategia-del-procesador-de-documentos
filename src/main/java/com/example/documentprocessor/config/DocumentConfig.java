@@ -14,8 +14,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Configuration class for document processing settings.
- * Maps application properties and provides configuration beans.
+ * Clase de configuración para los ajustes de procesamiento de documentos.
+ * Mapea las propiedades de la aplicación y proporciona beans de configuración.
  */
 @Slf4j
 @Configuration
@@ -25,13 +25,13 @@ import java.util.concurrent.Executors;
 public class DocumentConfig {
 
     /**
-     * Processing limits configuration
+     * Configuración de límites de procesamiento
      */
     @NotNull
     private Limits limits = new Limits();
 
     /**
-     * Document type specific configurations
+     * Configuraciones específicas por tipo de documento
      */
     @NotNull
     private Map<String, DocumentTypeConfig> documentTypes = Map.of(
@@ -42,13 +42,13 @@ public class DocumentConfig {
     );
 
     /**
-     * Statistics configuration
+     * Configuración de estadísticas
      */
     @NotNull
     private Statistics statistics = new Statistics();
 
     /**
-     * Performance configuration
+     * Configuración de rendimiento
      */
     @NotNull
     private Performance performance = new Performance();
@@ -103,65 +103,65 @@ public class DocumentConfig {
     }
 
     /**
-     * Bean for executor service if async processing is enabled
+     * Bean para el servicio ejecutor si el procesamiento asíncrono está habilitado
      */
     @Bean
     public ExecutorService documentProcessingExecutor() {
         if (performance.getAsyncProcessing()) {
-            log.info("Creating thread pool with {} threads for async document processing",
+            log.info("Creando un pool de hilos con {} hilos para el procesamiento asíncrono de documentos",
                     performance.getThreadPoolSize());
             return Executors.newFixedThreadPool(performance.getThreadPoolSize());
         } else {
-            log.info("Async processing disabled, using synchronous processing");
+            log.info("Procesamiento asíncrono deshabilitado, usando procesamiento sincrónico");
             return Executors.newSingleThreadExecutor(); // Fallback minimal executor
         }
     }
 
     /**
-     * Get configuration for a specific document type
+     * Obtener configuración para un tipo de documento específico
      */
     public DocumentTypeConfig getConfigForType(String documentType) {
         return documentTypes.getOrDefault(documentType.toLowerCase(), new DocumentTypeConfig());
     }
 
     /**
-     * Check if a file size is within limits
+     * Verificar si el tamaño de archivo está dentro de los límites
      */
     public boolean isFileSizeAllowed(long fileSizeBytes) {
         return fileSizeBytes <= limits.getMaxFileSizeBytes();
     }
 
     /**
-     * Check if text length is within limits
+     * Verificar si la longitud del texto está dentro de los límites
      */
     public boolean isTextLengthAllowed(int textLength) {
         return textLength <= limits.getMaxTextLength();
     }
 
     /**
-     * Get maximum allowed processing time in milliseconds
+     * Obtener el tiempo máximo de procesamiento permitido en milisegundos
      */
     public long getMaxProcessingTimeMs() {
         return limits.getMaxProcessingTimeMs();
     }
 
     /**
-     * Configuration validation and logging
+     * Validación y registro de la configuración
      */
     @jakarta.annotation.PostConstruct
     public void logConfiguration() {
-        log.info("Document Processor Configuration:");
-        log.info("  Max file size: {} MB", limits.getMaxFileSizeBytes() / (1024 * 1024));
-        log.info("  Max processing time: {} minutes", limits.getMaxProcessingTimeMs() / 60000);
-        log.info("  Max text length: {} characters", limits.getMaxTextLength());
-        log.info("  Max table rows: {}", limits.getMaxTableRows());
-        log.info("  Max Excel sheets: {}", limits.getMaxExcelSheets());
-        log.info("  Word frequency analysis: {}", statistics.getEnableWordFrequency());
-        log.info("  Language detection: {}", statistics.getEnableLanguageDetection());
-        log.info("  Async processing: {}", performance.getAsyncProcessing());
-        log.info("  Caching enabled: {}", performance.getEnableCaching());
+        log.info("Configuración del Procesador de Documentos:");
+        log.info("  Tamaño máximo de archivo: {} MB", limits.getMaxFileSizeBytes() / (1024 * 1024));
+        log.info("  Tiempo máximo de procesamiento: {} minutos", limits.getMaxProcessingTimeMs() / 60000);
+        log.info("  Longitud máxima de texto: {} caracteres", limits.getMaxTextLength());
+        log.info("  Máximo de filas en tabla: {}", limits.getMaxTableRows());
+        log.info("  Máximo de hojas en Excel: {}", limits.getMaxExcelSheets());
+        log.info("  Análisis de frecuencia de palabras: {}", statistics.getEnableWordFrequency());
+        log.info("  Detección de idioma: {}", statistics.getEnableLanguageDetection());
+        log.info("  Procesamiento asíncrono: {}", performance.getAsyncProcessing());
+        log.info("  Caché habilitada: {}", performance.getEnableCaching());
 
-        // Log document type configurations
+        // Registrar configuraciones por tipo de documento
         documentTypes.forEach((type, config) -> {
             log.debug("  {}: {}", type, config);
         });

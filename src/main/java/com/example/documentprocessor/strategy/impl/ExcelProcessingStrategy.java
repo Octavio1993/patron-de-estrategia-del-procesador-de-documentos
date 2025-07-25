@@ -83,7 +83,7 @@ public class ExcelProcessingStrategy implements DocumentProcessingStrategy {
 
             return resultBuilder
                     .success(true)
-                    .message(String.format("Successfully processed Excel file with %d sheets and %d total rows",
+                    .message(String.format("Archivo de Excel procesado correctamente con %d hojas y %d filas en total",
                             workbook.getNumberOfSheets(), totalRows))
                     .metadata(metadata)
                     .extractedData(allSheetsData)
@@ -92,13 +92,13 @@ public class ExcelProcessingStrategy implements DocumentProcessingStrategy {
                     .build();
 
         } catch (Exception e) {
-            log.error("Error processing Excel document: {}", document.getName(), e);
+            log.error("Error al procesar el documento de Excel: {}", document.getName(), e);
             long processingTime = System.currentTimeMillis() - startTime;
 
             return resultBuilder
                     .success(false)
-                    .message("Failed to process Excel document")
-                    .errors(List.of("Processing error: " + e.getMessage()))
+                    .message("No se pudo procesar el documento de Excel")
+                    .errors(List.of("error de procesamiento: " + e.getMessage()))
                     .processingTimeMs(processingTime)
                     .build();
         } finally {
@@ -106,7 +106,7 @@ public class ExcelProcessingStrategy implements DocumentProcessingStrategy {
                 try {
                     workbook.close();
                 } catch (IOException e) {
-                    log.warn("Error closing Excel workbook: {}", document.getName(), e);
+                    log.warn("Error al cerrar el libro de Excel: {}", document.getName(), e);
                 }
             }
         }

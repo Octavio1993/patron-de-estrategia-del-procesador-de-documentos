@@ -15,13 +15,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Document {
 
-    @NotBlank(message = "Document name cannot be blank")
+    @NotBlank(message = "El nombre del documento no puede estar en blanco")
     private String name;
 
-    @NotBlank(message = "Document type cannot be blank")
+    @NotBlank(message = "El tipo de documento no puede estar en blanco")
     private String type; // PDF, EXCEL, WORD, CSV
 
-    @NotNull(message = "Document content cannot be null")
+    @NotNull(message = "El contenido del documento no puede ser nulo")
     private byte[] content;
 
     private Long size;

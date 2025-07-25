@@ -16,7 +16,7 @@ import jakarta.validation.ConstraintViolationException;
 import java.util.Map;
 
 /**
- * Global exception handler for the document processor application.
+ * Manejador global de excepciones para la aplicación procesadora de documentos.
  */
 @Slf4j
 @RestControllerAdvice
@@ -24,14 +24,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UnsupportedDocumentTypeException.class)
     public ResponseEntity<ApiResponse<Object>> handleUnsupportedDocumentType(UnsupportedDocumentTypeException e) {
-        log.warn("Unsupported document type: {}", e.getMessage());
+        log.warn("Tipo de documento no soportado: {}", e.getMessage());
         return ResponseEntity.badRequest()
                 .body(ApiResponse.error("UNSUPPORTED_DOCUMENT_TYPE", e.getMessage()));
     }
 
     @ExceptionHandler(DocumentValidationException.class)
     public ResponseEntity<ApiResponse<Object>> handleDocumentValidation(DocumentValidationException e) {
-        log.warn("Document validation failed: {}", e.getMessage());
+        log.warn("La validación del documento falló: {}", e.getMessage());
         return ResponseEntity.badRequest()
                 .body(ApiResponse.error("VALIDATION_ERROR", e.getMessage(),
                         Map.of("validationErrors", e.getValidationErrors())));
@@ -39,36 +39,36 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(StrategyNotFoundException.class)
     public ResponseEntity<ApiResponse<Object>> handleStrategyNotFound(StrategyNotFoundException e) {
-        log.warn("Strategy not found: {}", e.getMessage());
+        log.warn("Estrategia no encontrada: {}", e.getMessage());
         return ResponseEntity.badRequest()
                 .body(ApiResponse.error("STRATEGY_NOT_FOUND", e.getMessage()));
     }
 
     @ExceptionHandler(DocumentProcessingException.class)
     public ResponseEntity<ApiResponse<Object>> handleDocumentProcessing(DocumentProcessingException e) {
-        log.error("Document processing error: {}", e.getMessage(), e);
+        log.error("Error en el procesamiento del documento: {}", e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error("PROCESSING_ERROR", e.getMessage()));
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ApiResponse<Object>> handleMaxUploadSize(MaxUploadSizeExceededException e) {
-        log.warn("File size exceeded: {}", e.getMessage());
+        log.warn("Tamaño de archivo excedido: {}", e.getMessage());
         return ResponseEntity.badRequest()
-                .body(ApiResponse.error("FILE_TOO_LARGE", "File size exceeds maximum allowed size"));
+                .body(ApiResponse.error("FILE_TOO_LARGE", "El archivo excede el tamaño máximo permitido"));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ApiResponse<Object>> handleConstraintViolation(ConstraintViolationException e) {
-        log.warn("Constraint violation: {}", e.getMessage());
+        log.warn("Violación de restricción: {}", e.getMessage());
         return ResponseEntity.badRequest()
-                .body(ApiResponse.error("CONSTRAINT_VIOLATION", "Validation constraint violated"));
+                .body(ApiResponse.error("CONSTRAINT_VIOLATION", "Restricción de validación violada"));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleGeneral(Exception e) {
-        log.error("Unexpected error: {}", e.getMessage(), e);
+        log.error("Error inesperado: {}", e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("INTERNAL_ERROR", "An unexpected error occurred"));
+                .body(ApiResponse.error("INTERNAL_ERROR", "Ocurrió un error inesperado"));
     }
 }

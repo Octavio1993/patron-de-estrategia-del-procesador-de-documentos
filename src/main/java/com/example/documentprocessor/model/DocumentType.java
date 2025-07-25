@@ -21,7 +21,7 @@ public enum DocumentType {
 
     public static DocumentType fromExtension(String extension) {
         if (extension == null || extension.trim().isEmpty()) {
-            throw new IllegalArgumentException("Extension cannot be null or empty");
+            throw new IllegalArgumentException("La extensión no puede ser nula o vacía");
         }
 
         String cleanExtension = extension.toLowerCase().trim();
@@ -33,18 +33,18 @@ public enum DocumentType {
         return Arrays.stream(values())
                 .filter(type -> type.getSupportedExtensions().contains(finalExtension))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unsupported file extension: " + extension));
+                .orElseThrow(() -> new IllegalArgumentException("Extensión de archivo no compatible: " + extension));
     }
 
     public static DocumentType fromTypeName(String typeName) {
         if (typeName == null || typeName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Type name cannot be null or empty");
+            throw new IllegalArgumentException("El nombre del tipo no puede ser nulo ni estar vacío");
         }
 
         return Arrays.stream(values())
                 .filter(type -> type.getTypeName().equalsIgnoreCase(typeName.trim()))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unknown document type: " + typeName));
+                .orElseThrow(() -> new IllegalArgumentException("Tipo de documento desconocido: " + typeName));
     }
 
     public boolean supportsExtension(String extension) {

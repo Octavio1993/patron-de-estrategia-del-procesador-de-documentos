@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import java.util.Arrays;
 
 /**
- * Exception thrown when attempting to process a document type that is not supported.
+ * Se lanza una excepción al intentar procesar un tipo de documento no compatible.
  */
 @Getter
 public class UnsupportedDocumentTypeException extends DocumentProcessingException {
@@ -38,7 +38,7 @@ public class UnsupportedDocumentTypeException extends DocumentProcessingExceptio
 
     private static String buildMessage(String fileExtension, Set<String> supportedExtensions) {
         return String.format(
-                "Unsupported document type '%s'. Supported types are: %s",
+                "Tipo de documento no compatible '%s'. Los tipos compatibles son: %s",
                 fileExtension,
                 String.join(", ", supportedExtensions)
         );

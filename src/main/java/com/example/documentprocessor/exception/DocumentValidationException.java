@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 /**
- * Exception thrown when document validation fails.
+ * Excepción lanzada cuando falla la validación del documento.
  */
 @Getter
 public class DocumentValidationException extends DocumentProcessingException {
@@ -26,13 +26,13 @@ public class DocumentValidationException extends DocumentProcessingException {
     }
 
     public DocumentValidationException(List<String> validationErrors) {
-        super("Document validation failed: " + String.join(", ", validationErrors),
+        super("La validación del documento falló: " + String.join(", ", validationErrors),
                 null, null, "VALIDATION_ERROR");
         this.validationErrors = new ArrayList<>(validationErrors);
     }
 
     public DocumentValidationException(List<String> validationErrors, String documentName) {
-        super("Document validation failed: " + String.join(", ", validationErrors),
+        super("La validación del documento falló: " + String.join(", ", validationErrors),
                 documentName, null, "VALIDATION_ERROR");
         this.validationErrors = new ArrayList<>(validationErrors);
     }

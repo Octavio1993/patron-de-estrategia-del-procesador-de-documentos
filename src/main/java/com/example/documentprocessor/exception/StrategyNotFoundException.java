@@ -4,7 +4,7 @@ import com.example.documentprocessor.model.DocumentType;
 import lombok.Getter;
 
 /**
- * Exception thrown when no strategy is found for a given document type.
+ * Se lanza una excepción cuando no se encuentra ninguna estrategia para un tipo de documento determinado.
  */
 @Getter
 public class StrategyNotFoundException extends DocumentProcessingException {
@@ -12,13 +12,13 @@ public class StrategyNotFoundException extends DocumentProcessingException {
     private final DocumentType requestedType;
 
     public StrategyNotFoundException(DocumentType requestedType) {
-        super(String.format("No processing strategy found for document type: %s", requestedType.getTypeName()),
+        super(String.format("No se encontró ninguna estrategia de procesamiento para el tipo de documento: %s", requestedType.getTypeName()),
                 null, null, "STRATEGY_NOT_FOUND");
         this.requestedType = requestedType;
     }
 
     public StrategyNotFoundException(DocumentType requestedType, String documentName) {
-        super(String.format("No processing strategy found for document type: %s", requestedType.getTypeName()),
+        super(String.format("No se encontró ninguna estrategia de procesamiento para el tipo de documento: %s", requestedType.getTypeName()),
                 documentName, null, "STRATEGY_NOT_FOUND");
         this.requestedType = requestedType;
     }

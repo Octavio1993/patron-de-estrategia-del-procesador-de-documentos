@@ -60,7 +60,7 @@ public class PdfProcessingStrategy implements DocumentProcessingStrategy {
 
             return resultBuilder
                     .success(true)
-                    .message(String.format("Successfully processed PDF with %d pages",
+                    .message(String.format("PDF procesado exitosamente con %d páginas",
                             pdDocument.getNumberOfPages()))
                     .metadata(metadata)
                     .extractedText(extractedText)
@@ -69,29 +69,29 @@ public class PdfProcessingStrategy implements DocumentProcessingStrategy {
                     .build();
 
         } catch (org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException e) {
-            log.error("Password protected PDF cannot be processed: {}", document.getName(), e);
+            log.error("No se pueden procesar los PDF protegidos con contraseña: {}", document.getName(), e);
             return resultBuilder
                     .success(false)
-                    .message("PDF requires password for processing")
-                    .errors(List.of("Password protected document"))
+                    .message("El PDF requiere contraseña para su procesamiento")
+                    .errors(List.of("Documento protegido con contraseña"))
                     .processingTimeMs(System.currentTimeMillis() - startTime)
                     .build();
 
         } catch (IOException e) {
-            log.error("Error reading PDF document: {}", document.getName(), e);
+            log.error("Error al leer el documento PDF: {}", document.getName(), e);
             return resultBuilder
                     .success(false)
-                    .message("Failed to read PDF document")
-                    .errors(List.of("IO error while reading PDF: " + e.getMessage()))
+                    .message("No se pudo leer el documento PDF")
+                    .errors(List.of("Error de E/S al leer un PDF: " + e.getMessage()))
                     .processingTimeMs(System.currentTimeMillis() - startTime)
                     .build();
 
         } catch (Exception e) {
-            log.error("Unexpected error processing PDF document: {}", document.getName(), e);
+            log.error("Error inesperado al procesar un documento PDF: {}", document.getName(), e);
             return resultBuilder
                     .success(false)
-                    .message("Unexpected error during PDF processing")
-                    .errors(List.of("Processing error: " + e.getMessage()))
+                    .message("Error inesperado durante el procesamiento de PDF")
+                    .errors(List.of("error de procesamiento: " + e.getMessage()))
                     .processingTimeMs(System.currentTimeMillis() - startTime)
                     .build();
 
@@ -100,7 +100,7 @@ public class PdfProcessingStrategy implements DocumentProcessingStrategy {
                 try {
                     pdDocument.close();
                 } catch (IOException e) {
-                    log.warn("Error closing PDF document: {}", document.getName(), e);
+                    log.warn("Error al cerrar el documento PDF: {}", document.getName(), e);
                 }
             }
         }

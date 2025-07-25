@@ -17,8 +17,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Service that orchestrates document processing using the Strategy pattern.
- * Automatically discovers and manages all available processing strategies.
+ * Servicio que organiza el procesamiento de documentos mediante el patrón de estrategia.
+ * Detecta y gestiona automáticamente todas las estrategias de procesamiento disponibles.
  */
 @Slf4j
 @Service
@@ -31,7 +31,7 @@ public class DocumentProcessorService {
 
     @PostConstruct
     public void initializeStrategies() {
-        log.info("Initializing document processing strategies...");
+        log.info("Inicializando estrategias de procesamiento de documentos...");
 
         // Crear mapa por tipo de documento, priorizando por priority()
         strategyMap = strategies.stream()
@@ -42,7 +42,7 @@ public class DocumentProcessorService {
                         Map.Entry::getKey,
                         entry -> entry.getValue().stream()
                                 .min(Comparator.comparingInt(DocumentProcessingStrategy::getPriority))
-                                .orElseThrow(() -> new IllegalStateException("No strategy found for type: " + entry.getKey()))
+                                .orElseThrow(() -> new IllegalStateException("No se encontró ninguna estrategia para el tipo: " + entry.getKey()))
                 ));
 
         // Crear mapa por nombre de estrategia
@@ -51,30 +51,30 @@ public class DocumentProcessorService {
                         DocumentProcessingStrategy::getStrategyName,
                         Function.identity(),
                         (existing, replacement) -> {
-                            log.warn("Duplicate strategy name found: {}. Using strategy with higher priority.",
+                            log.warn("Se encontró un nombre de estrategia duplicado: {}. Se está usando una estrategia con mayor prioridad..",
                                     existing.getStrategyName());
                             return existing.getPriority() <= replacement.getPriority() ? existing : replacement;
                         }
                 ));
 
-        log.info("Initialized {} strategies for {} document types",
+        log.info("Estrategias {} inicializadas para tipos de documentos {}",
                 strategies.size(), strategyMap.size());
 
         // Log de estrategias disponibles
         strategyMap.forEach((type, strategy) ->
-                log.info("Document type {} -> Strategy: {} (Priority: {})",
+                log.info("Tipo de documento {} -> Estrategia: {} (Prioridad: {})",
                         type.getTypeName(), strategy.getStrategyName(), strategy.getPriority()));
     }
 
     /**
-     * Process a document using the appropriate strategy based on the document type.
+     * Procesar un documento utilizando la estrategia adecuada según el tipo de documento.
      *
-     * @param document the document to process
-     * @return ProcessingResult containing the processing outcome
-     * @throws DocumentProcessingException if processing fails
+     * @param document el documento a procesar
+     * @return ProcessingResult que contiene el resultado del procesamiento
+     * @throws DocumentProcessingException si el procesamiento falla
      */
     public ProcessingResult processDocument(Document document) {
-        log.info("Processing document: {} (Size: {} bytes)", document.getName(), document.getSize());
+        log.info("Procesando documento: {} (Tamaño: {} bytes)", document.getName(), document.getSize());
 
         try {
             // Validar documento básico
@@ -82,16 +82,16 @@ public class DocumentProcessorService {
 
             // Determinar tipo de documento
             DocumentType documentType = determineDocumentType(document);
-            log.debug("Detected document type: {} for file: {}", documentType, document.getName());
+            log.debug("Tipo de documento detectado: {} para el archivo: {}", documentType, document.getName());
 
             // Obtener estrategia apropiada
             DocumentProcessingStrategy strategy = getStrategy(documentType);
-            log.debug("Using strategy: {} for document: {}", strategy.getStrategyName(), document.getName());
+            log.debug("Usando la estrategia: {} para el documento: {}", strategy.getStrategyName(), document.getName());
 
             // Verificar que la estrategia puede procesar el documento
             if (!strategy.canProcess(document)) {
                 throw new DocumentProcessingException(
-                        String.format("Strategy %s cannot process document %s",
+                        String.format("La estrategia %s no puede procesar el documento %s",
                                 strategy.getStrategyName(), document.getName()),
                         document.getName(),
                         strategy.getStrategyName()
@@ -103,25 +103,25 @@ public class DocumentProcessorService {
 
             // Log del resultado
             if (result.isSuccess()) {
-                log.info("Successfully processed document: {} using strategy: {} in {} ms",
+                log.info("Documento procesado exitosamente: {} usando la estrategia: {} en {} ms",
                         document.getName(), strategy.getStrategyName(), result.getProcessingTimeMs());
             } else {
-                log.warn("Failed to process document: {} using strategy: {}. Errors: {}",
+                log.warn("No se pudo procesar el documento: {} con la estrategia: {}. Errores: {}",
                         document.getName(), strategy.getStrategyName(), result.getErrors());
             }
 
             return result;
 
         } catch (UnsupportedDocumentTypeException | StrategyNotFoundException e) {
-            log.error("Document type not supported: {}", document.getName(), e);
+            log.error("Tipo de documento no admitido: {}", document.getName(), e);
             throw e;
         } catch (DocumentProcessingException e) {
-            log.error("Document processing failed: {}", document.getName(), e);
+            log.error("Error en el procesamiento del documento: {}", document.getName(), e);
             throw e;
         } catch (Exception e) {
-            log.error("Unexpected error processing document: {}", document.getName(), e);
+            log.error("Error inesperado al procesar el documento: {}", document.getName(), e);
             throw new DocumentProcessingException(
-                    "Unexpected error during document processing: " + e.getMessage(),
+                    "Error inesperado durante el procesamiento del documento: " + e.getMessage(),
                     document.getName(),
                     null,
                     e
@@ -130,16 +130,16 @@ public class DocumentProcessorService {
     }
 
     /**
-     * Process a document using a specific strategy by name.
-     * Useful for testing or when you want to force a specific strategy.
+     * Procesar un documento usando una estrategia específica por nombre.
+     * Útil para realizar pruebas o cuando se desea forzar una estrategia específica.
      *
-     * @param document the document to process
-     * @param strategyName the name of the strategy to use
-     * @return ProcessingResult containing the processing outcome
-     * @throws DocumentProcessingException if processing fails
+     * @param document el documento a procesar
+     * @param strategyName el nombre de la estrategia a usar
+     * @return ProcessingResult contiene el resultado del procesamiento
+     * @throws DocumentProcessingException si el procesamiento falla
      */
     public ProcessingResult processDocumentWithStrategy(Document document, String strategyName) {
-        log.info("Processing document: {} with specific strategy: {}", document.getName(), strategyName);
+        log.info("Procesando documento: {} con estrategia específica: {}", document.getName(), strategyName);
 
         try {
             validateDocument(document);
@@ -147,7 +147,7 @@ public class DocumentProcessorService {
             DocumentProcessingStrategy strategy = strategyNameMap.get(strategyName);
             if (strategy == null) {
                 throw new StrategyNotFoundException(
-                        String.format("Strategy not found: %s. Available strategies: %s",
+                        String.format("Estrategia no encontrada: %s. Estrategias disponibles: %s",
                                 strategyName, getAvailableStrategies()),
                         null
                 );
@@ -155,7 +155,7 @@ public class DocumentProcessorService {
 
             if (!strategy.canProcess(document)) {
                 throw new DocumentProcessingException(
-                        String.format("Strategy %s cannot process document %s of type %s",
+                        String.format("La estrategia %s no puede procesar el documento %s del tipo %s",
                                 strategyName, document.getName(), document.determineTypeFromExtension()),
                         document.getName(),
                         strategyName
@@ -165,12 +165,12 @@ public class DocumentProcessorService {
             return strategy.process(document);
 
         } catch (Exception e) {
-            log.error("Error processing document with specific strategy: {}", strategyName, e);
+            log.error("Error al procesar un documento con una estrategia específica: {}", strategyName, e);
             if (e instanceof DocumentProcessingException) {
                 throw e;
             }
             throw new DocumentProcessingException(
-                    "Error processing document with strategy " + strategyName + ": " + e.getMessage(),
+                    "Error al procesar documento con estrategia " + strategyName + ": " + e.getMessage(),
                     document.getName(),
                     strategyName,
                     e
@@ -179,9 +179,9 @@ public class DocumentProcessorService {
     }
 
     /**
-     * Get information about all available strategies.
+     * Obtener información sobre todas las estrategias disponibles.
      *
-     * @return Map containing strategy information
+     * @return Mapa con información de la estrategia
      */
     public Map<String, Object> getStrategiesInfo() {
         Map<String, Object> info = new HashMap<>();
@@ -212,20 +212,20 @@ public class DocumentProcessorService {
     }
 
     /**
-     * Check if a document type is supported.
+     * Comprueba si se admite un tipo de documento.
      *
-     * @param documentType the document type to check
-     * @return true if supported, false otherwise
+     * @param documentType el tipo de documento a comprobar
+     * @return true si se admite, false en caso contrario
      */
     public boolean isDocumentTypeSupported(DocumentType documentType) {
         return strategyMap.containsKey(documentType);
     }
 
     /**
-     * Check if a file extension is supported.
+     * Comprueba si se admite una extensión de archivo.
      *
-     * @param fileExtension the file extension to check (with or without dot)
-     * @return true if supported, false otherwise
+     * @param fileExtension la extensión del archivo a comprobar (con o sin punto)
+     * @return true si se admite, false en caso contrario
      */
     public boolean isFileExtensionSupported(String fileExtension) {
         try {
@@ -237,9 +237,9 @@ public class DocumentProcessorService {
     }
 
     /**
-     * Get the list of all supported file extensions.
+     * Obtener la lista de todas las extensiones de archivo compatibles.
      *
-     * @return Set of supported extensions
+     * @return Conjunto de extensiones compatibles
      */
     public Set<String> getSupportedExtensions() {
         return Arrays.stream(DocumentType.values())
@@ -248,10 +248,10 @@ public class DocumentProcessorService {
     }
 
     /**
-     * Get processing statistics across all strategies.
-     * This could be extended to track actual usage statistics.
+     * Obtener estadísticas de procesamiento de todas las estrategias.
+     * Esto podría ampliarse para rastrear las estadísticas de uso real.
      *
-     * @return Map containing processing statistics
+     * @return Mapa que contiene las estadísticas de procesamiento.
      */
     public Map<String, Object> getProcessingStatistics() {
         Map<String, Object> stats = new HashMap<>();
@@ -274,15 +274,15 @@ public class DocumentProcessorService {
 
     private void validateDocument(Document document) {
         if (document == null) {
-            throw new IllegalArgumentException("Document cannot be null");
+            throw new IllegalArgumentException("El documento no puede ser nulo.");
         }
 
         if (document.getName() == null || document.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Document name cannot be null or empty");
+            throw new IllegalArgumentException("El nombre del documento no puede ser nulo o estar vacío");
         }
 
         if (document.getContent() == null || document.getContent().length == 0) {
-            throw new IllegalArgumentException("Document content cannot be null or empty");
+            throw new IllegalArgumentException("El contenido del documento no puede estar vacío o ser nulo");
         }
 
         // Establecer el tamaño si no está definido

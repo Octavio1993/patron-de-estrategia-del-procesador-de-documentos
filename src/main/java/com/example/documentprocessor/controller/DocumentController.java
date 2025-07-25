@@ -22,8 +22,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 /**
- * REST Controller for document processing operations.
- * Demonstrates the Strategy pattern in action through HTTP endpoints.
+ * Controlador REST para operaciones de procesamiento de documentos.
+ * Demuestra el uso del patrón Strategy a través de endpoints HTTP.
  */
 @Slf4j
 @RestController
@@ -35,18 +35,18 @@ public class DocumentController {
     private final DocumentProcessorService documentProcessorService;
 
     /**
-     * Process a document uploaded as multipart file.
-     * The processing strategy is automatically selected based on file extension.
+     * Procesa un documento cargado como archivo multipart.
+     * La estrategia de procesamiento se selecciona automáticamente en base a la extensión del archivo.
      *
-     * @param file the document file to process
-     * @return ProcessingResult with extracted data and metadata
+     * @param file el archivo de documento a procesar
+     * @return ProcessingResult con los datos y metadatos extraídos
      */
     @PostMapping(value = "/process", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<ProcessingResult>> processDocument(
             @RequestParam("file") @NotNull MultipartFile file) {
 
         long startTime = System.currentTimeMillis();
-        log.info("Received document processing request for file: {} (Size: {} bytes)",
+        log.info("Solicitud de procesamiento de documento recibida para el archivo: {} (Tamaño: {} bytes)",
                 file.getOriginalFilename(), file.getSize());
 
         try {
@@ -60,48 +60,49 @@ public class DocumentController {
             ProcessingResult result = documentProcessorService.processDocument(document);
 
             long totalTime = System.currentTimeMillis() - startTime;
-            log.info("Document processing completed in {} ms for file: {}", totalTime, file.getOriginalFilename());
+            log.info("Procesamiento del documento completado en {} ms para el archivo: {}",
+                    totalTime, file.getOriginalFilename());
 
-            return ResponseEntity.ok(ApiResponse.success(result, "Document processed successfully"));
+            return ResponseEntity.ok(ApiResponse.success(result, "Documento procesado correctamente"));
 
         } catch (UnsupportedDocumentTypeException e) {
-            log.warn("Unsupported document type: {}", e.getFileExtension(), e);
+            log.warn("Tipo de documento no soportado: {}", e.getFileExtension(), e);
             return ResponseEntity.badRequest()
                     .body(ApiResponse.error("UNSUPPORTED_DOCUMENT_TYPE", e.getMessage(),
                             Map.of("supportedExtensions", documentProcessorService.getSupportedExtensions())));
 
         } catch (DocumentValidationException e) {
-            log.warn("Document validation failed: {}", e.getValidationErrors(), e);
+            log.warn("La validación del documento falló: {}", e.getValidationErrors(), e);
             return ResponseEntity.badRequest()
                     .body(ApiResponse.error("VALIDATION_ERROR", e.getMessage(),
                             Map.of("validationErrors", e.getValidationErrors())));
 
         } catch (DocumentProcessingException e) {
-            log.error("Document processing failed: {}", e.getMessage(), e);
+            log.error("El procesamiento del documento falló: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error("PROCESSING_ERROR", e.getMessage()));
 
         } catch (Exception e) {
-            log.error("Unexpected error processing document: {}", file.getOriginalFilename(), e);
+            log.error("Error inesperado al procesar el documento: {}", file.getOriginalFilename(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("INTERNAL_ERROR", "An unexpected error occurred"));
+                    .body(ApiResponse.error("INTERNAL_ERROR", "Ocurrió un error inesperado"));
         }
     }
 
     /**
-     * Process a document using a specific strategy.
-     * Useful for testing different strategies or forcing a particular processing approach.
+     * Procesa un documento usando una estrategia específica.
+     * Útil para probar diferentes estrategias o forzar un enfoque de procesamiento en particular.
      *
-     * @param file the document file to process
-     * @param strategyName the name of the strategy to use
-     * @return ProcessingResult with extracted data and metadata
+     * @param file el archivo de documento a procesar
+     * @param strategyName el nombre de la estrategia a utilizar
+     * @return ProcessingResult con los datos y metadatos extraídos
      */
     @PostMapping(value = "/process/{strategyName}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<ProcessingResult>> processDocumentWithStrategy(
             @RequestParam("file") @NotNull MultipartFile file,
             @PathVariable @NotBlank String strategyName) {
 
-        log.info("Received document processing request with strategy '{}' for file: {}",
+        log.info("Solicitud de procesamiento de documento recibida con la estrategia '{}' para el archivo: {}",
                 strategyName, file.getOriginalFilename());
 
         try {
@@ -111,156 +112,157 @@ public class DocumentController {
             ProcessingResult result = documentProcessorService.processDocumentWithStrategy(document, strategyName);
 
             return ResponseEntity.ok(ApiResponse.success(result,
-                    "Document processed successfully with strategy: " + strategyName));
+                    "Documento procesado correctamente con la estrategia: " + strategyName));
 
         } catch (StrategyNotFoundException e) {
-            log.warn("Strategy not found: {}", strategyName, e);
+            log.warn("Estrategia no encontrada: {}", strategyName, e);
             return ResponseEntity.badRequest()
                     .body(ApiResponse.error("STRATEGY_NOT_FOUND", e.getMessage(),
                             Map.of("availableStrategies", getAvailableStrategyNames())));
 
         } catch (DocumentProcessingException e) {
-            log.error("Document processing failed with strategy {}: {}", strategyName, e.getMessage(), e);
+            log.error("Falló el procesamiento del documento con la estrategia {}: {}", strategyName, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error("PROCESSING_ERROR", e.getMessage()));
 
         } catch (Exception e) {
-            log.error("Unexpected error processing document with strategy {}: {}", strategyName, e);
+            log.error("Error inesperado al procesar el documento con la estrategia {}: {}", strategyName, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("INTERNAL_ERROR", "An unexpected error occurred"));
+                    .body(ApiResponse.error("INTERNAL_ERROR", "Ocurrió un error inesperado"));
         }
     }
 
     /**
-     * Get information about all available processing strategies.
+     * Obtener información sobre todas las estrategias de procesamiento disponibles.
      *
-     * @return Map containing information about available strategies
+     * @return Mapa que contiene información sobre las estrategias disponibles
      */
     @GetMapping("/strategies")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getStrategiesInfo() {
-        log.debug("Fetching strategies information");
+        log.debug("Obteniendo información de las estrategias");
 
         try {
             Map<String, Object> strategiesInfo = documentProcessorService.getStrategiesInfo();
-            return ResponseEntity.ok(ApiResponse.success(strategiesInfo, "Strategies information retrieved"));
+            return ResponseEntity.ok(ApiResponse.success(strategiesInfo, "Información de estrategias recuperada"));
 
         } catch (Exception e) {
-            log.error("Error retrieving strategies information", e);
+            log.error("Error al recuperar información de estrategias", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("INTERNAL_ERROR", "Error retrieving strategies information"));
+                    .body(ApiResponse.error("INTERNAL_ERROR", "Error al recuperar información de estrategias"));
         }
     }
 
     /**
-     * Check if a specific file extension is supported.
+     * Verificar si una extensión de archivo específica está soportada.
      *
-     * @param extension the file extension to check (with or without dot)
-     * @return boolean indicating if the extension is supported
+     * @param extension la extensión del archivo a verificar (con o sin punto)
+     * @return booleano que indica si la extensión está soportada
      */
     @GetMapping("/supported-extensions/{extension}")
     public ResponseEntity<ApiResponse<Boolean>> isExtensionSupported(@PathVariable String extension) {
-        log.debug("Checking if extension '{}' is supported", extension);
+        log.debug("Verificando si la extensión '{}' está soportada", extension);
+
 
         try {
             boolean isSupported = documentProcessorService.isFileExtensionSupported(extension);
             String message = isSupported ?
-                    "Extension is supported" :
-                    "Extension is not supported";
+                    "La extensión está soportada" :
+                    "La extensión no está soportada";
 
             Map<String, Object> additionalData = new HashMap<>();
             additionalData.put("extension", extension);
             if (!isSupported) {
-                additionalData.put("supportedExtensions", documentProcessorService.getSupportedExtensions());
+                additionalData.put("extensionesSoportadas", documentProcessorService.getSupportedExtensions());
             }
 
             return ResponseEntity.ok(ApiResponse.success(isSupported, message, additionalData));
 
         } catch (Exception e) {
-            log.error("Error checking extension support for: {}", extension, e);
+            log.error("Error al verificar si la extensión está soportada: {}", extension, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("INTERNAL_ERROR", "Error checking extension support"));
+                    .body(ApiResponse.error("INTERNAL_ERROR", "Error al verificar soporte de extensión"));
         }
     }
 
     /**
-     * Get all supported file extensions.
+     * Obtiene todas las extensiones de archivo soportadas.
      *
-     * @return Set of supported file extensions
+     * @return Conjunto de extensiones soportadas
      */
     @GetMapping("/supported-extensions")
     public ResponseEntity<ApiResponse<Set<String>>> getSupportedExtensions() {
-        log.debug("Fetching all supported extensions");
+        log.debug("Obteniendo todas las extensiones soportadas");
 
         try {
             Set<String> extensions = documentProcessorService.getSupportedExtensions();
-            return ResponseEntity.ok(ApiResponse.success(extensions, "Supported extensions retrieved"));
+            return ResponseEntity.ok(ApiResponse.success(extensions, "Extensiones soportadas recuperadas"));
 
         } catch (Exception e) {
-            log.error("Error retrieving supported extensions", e);
+            log.error("Error al recuperar las extensiones soportadas", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("INTERNAL_ERROR", "Error retrieving supported extensions"));
+                    .body(ApiResponse.error("INTERNAL_ERROR", "Error al recuperar extensiones soportadas"));
         }
     }
 
     /**
-     * Get processing statistics and system information.
+     * Obtiene estadísticas de procesamiento e información del sistema.
      *
-     * @return Map containing processing statistics
+     * @return Mapa con estadísticas de procesamiento
      */
     @GetMapping("/statistics")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getProcessingStatistics() {
-        log.debug("Fetching processing statistics");
+        log.debug("Obteniendo estadísticas de procesamiento");
 
         try {
             Map<String, Object> statistics = documentProcessorService.getProcessingStatistics();
-            return ResponseEntity.ok(ApiResponse.success(statistics, "Processing statistics retrieved"));
+            return ResponseEntity.ok(ApiResponse.success(statistics, "Estadísticas de procesamiento recuperadas"));
 
         } catch (Exception e) {
-            log.error("Error retrieving processing statistics", e);
+            log.error("Error al recuperar estadísticas de procesamiento", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("INTERNAL_ERROR", "Error retrieving processing statistics"));
+                    .body(ApiResponse.error("INTERNAL_ERROR", "Error al recuperar estadísticas de procesamiento"));
         }
     }
 
     /**
-     * Health check endpoint to verify the service is running.
+     * Endpoint de verificación de estado del servicio (Health check).
      *
-     * @return Simple health status
+     * @return Estado de salud simple del servicio
      */
     @GetMapping("/health")
     public ResponseEntity<ApiResponse<Map<String, Object>>> healthCheck() {
         Map<String, Object> health = new HashMap<>();
-        health.put("status", "UP");
+        health.put("estado", "ACTIVO");
         health.put("timestamp", LocalDateTime.now());
-        health.put("availableStrategies", getAvailableStrategyNames().size());
-        health.put("supportedExtensions", documentProcessorService.getSupportedExtensions().size());
+        health.put("estrategiasDisponibles", getAvailableStrategyNames().size());
+        health.put("extensionesSoportadas", documentProcessorService.getSupportedExtensions().size());
 
-        return ResponseEntity.ok(ApiResponse.success(health, "Service is healthy"));
+        return ResponseEntity.ok(ApiResponse.success(health, "El servicio está funcionando correctamente"));
     }
 
     // Métodos privados de ayuda
 
     private void validateMultipartFile(MultipartFile file) {
         if (file.isEmpty()) {
-            throw new DocumentValidationException("File cannot be empty");
+            throw new DocumentValidationException("El archivo no puede estar vacío");
         }
 
         if (file.getOriginalFilename() == null || file.getOriginalFilename().trim().isEmpty()) {
-            throw new DocumentValidationException("File must have a valid filename");
+            throw new DocumentValidationException("El archivo debe tener un nombre de archivo válido");
         }
 
         // Validar tamaño máximo (100MB por ejemplo)
         long maxSize = 100 * 1024 * 1024; // 100MB
         if (file.getSize() > maxSize) {
             throw new DocumentValidationException(
-                    String.format("File size (%d bytes) exceeds maximum allowed size (%d bytes)",
+                    String.format("El tamaño del archivo (%d bytes) excede el tamaño máximo permitido (%d bytes)",
                             file.getSize(), maxSize));
         }
 
         // Validar que tenga extensión
         String filename = file.getOriginalFilename();
         if (!filename.contains(".")) {
-            throw new DocumentValidationException("File must have a valid extension");
+            throw new DocumentValidationException("El archivo debe tener una extensión válida");
         }
     }
 
@@ -275,7 +277,7 @@ public class DocumentController {
 
     private String determineTypeFromFilename(String filename) {
         if (filename == null || !filename.contains(".")) {
-            return "UNKNOWN";
+            return "DESCONOCIDO";
         }
 
         String extension = filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
@@ -284,7 +286,7 @@ public class DocumentController {
             case "xlsx", "xls" -> "EXCEL";
             case "docx", "doc" -> "WORD";
             case "csv" -> "CSV";
-            default -> "UNKNOWN";
+            default -> "DESCONOCIDO";
         };
     }
 
@@ -298,7 +300,7 @@ public class DocumentController {
     }
 
     /**
-     * Generic API Response wrapper for consistent response format.
+     * Contenedor genérico de respuestas API para un formato de respuesta consistente.
      */
     public static class ApiResponse<T> {
         public boolean success;

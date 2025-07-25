@@ -3,8 +3,8 @@ package com.example.documentprocessor.exception;
 import lombok.Getter;
 
 /**
- * Exception thrown when there's an error during document processing.
- * This is a general exception for any processing-related error.
+ * Excepción lanzada cuando ocurre un error durante el procesamiento de documentos.
+ * Es una excepción general para cualquier error relacionado con el procesamiento.
  */
 @Getter
 public class DocumentProcessingException extends RuntimeException {
